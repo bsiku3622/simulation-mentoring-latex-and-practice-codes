@@ -1,0 +1,59 @@
+\section*{Simulation Performance Experiments}
+
+This section explores various implementation strategies that affect the performance of large-scale simulations, focusing on branching, memory layout, and memory allocation.
+
+\subsection*{Constraint Handling: If-Else vs Ternary Operator}
+
+\textbf{Simulation Scenario:}
+Particles are confined within a 1D boundary $[-B, B]$. When a particle exceeds the boundary, its position is clamped and its velocity is reversed.
+
+\textbf{Implementation Comparison:}
+The simulation in \texttt{p4\_branch.cpp} compares two ways to enforce these constraints:
+\begin{itemize}
+    \item \textbf{If-Else:} Uses standard conditional blocks.
+    \item \textbf{Ternary Operator:} Uses inline conditional expressions.
+\end{itemize}
+
+\textbf{Performance Interpretation:}
+While logically equivalent, compilers can often optimize ternary operators into \textbf{conditional move (CMOV)} instructions. Unlike jumps, CMOV instructions avoid the overhead of branch prediction, leading to more stable performance when boundary collisions are unpredictable.
+
+\subsection*{Memory Layout: AoS vs SoA}
+
+Numerical simulations often process massive amounts of data. The way this data is arranged in memory significantly impacts performance due to CPU cache behavior.
+
+\textbf{AoS (Array of Structures):}
+\[
+\text{struct Particle \{ float x, y, z, vx, vy, vz; \};} \quad \text{Particle p[N];}
+\]
+Each particle's attributes are stored together. This is intuitive but can be inefficient when only a subset of data (e.g., only positions) is needed, as the CPU still loads the irrelevant velocity data into the cache.
+
+\textbf{SoA (Structure of Arrays):}
+\[
+\text{float x[N], y[N], z[N], vx[N], vy[N], vz[N];}
+\]
+Each attribute is stored in its own contiguous array.
+
+\textbf{Performance Interpretation:}
+The SoA layout is generally preferred in simulation kernels for two reasons:
+\begin{enumerate}
+    \item \textbf{Cache Locality:} When updating only positions, the CPU loads a cache line entirely filled with position data. This maximizes cache utilization and reduces memory bandwidth waste.
+    \item \textbf{SIMD Utilization:} Contiguous attribute arrays allow the compiler to use \textbf{SIMD (Single Instruction, Multiple Data)} instructions, such as AVX-512, to process multiple particles (e.g., 8 or 16) in a single CPU cycle.
+\end{enumerate}
+
+\subsection*{Memory Allocation: Stack vs Heap}
+
+\textbf{Simulation Scenario:}
+Large arrays of particles are allocated to measure the overhead of memory management.
+
+\textbf{Implementation Comparison:}
+\begin{itemize}
+    \item \textbf{Stack Allocation:} \texttt{Particle p[N];} (Size must be known at compile time or be small).
+    \item \textbf{Heap Allocation:} \texttt{std::vector<Particle> p(N);} (Dynamic size).
+\end{itemize}
+
+\textbf{Performance Interpretation:}
+Stack allocation is nearly instantaneous as it only involves moving the stack pointer. Heap allocation requires searching for available blocks in the free store, which involves significant operating system overhead. In high-frequency simulations, frequent heap allocations can become a major bottleneck.
+
+\subsection*{Conclusion}
+
+Optimizing simulation performance requires an understanding of how code translates to hardware operations. Minimizing branches, ensuring cache-friendly memory layouts (SoA), and preferring efficient allocation strategies are key to handling millions of particles in real-time.

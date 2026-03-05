@@ -1,0 +1,50 @@
+\section*{Taylor Series Simulation}
+
+Numerical simulations often use Taylor series approximations to evaluate transcendental functions like $e^x$, $\sin(x)$, and $\cos(x)$. This section demonstrates how a function can be approximated by a polynomial of degree $N$.
+
+\subsection*{Mathematical Model}
+
+The Taylor series of a smooth function $f(x)$ centered at $a$ is defined as:
+\[
+f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!} (x - a)^n
+\]
+For the exponential function $e^x$ centered at $a = 0$ (also known as the Maclaurin series), we have:
+\[
+e^x = \sum_{n=0}^{\infty} \frac{x^n}{n!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \dots
+\]
+
+\subsection*{Simulation Scenario}
+
+The simulation in \texttt{p5\_taylor.cpp} calculates the $N$-th partial sum $S_N(x)$:
+\[
+S_N(x) = \sum_{n=0}^{N} \frac{x^n}{n!}
+\]
+It compares $S_N(x)$ to the actual value obtained from \texttt{std::exp(x)} and measures the absolute error for increasing values of $N$.
+
+\subsection*{Numerical Update Rule}
+
+To efficiently calculate each term without recomputing the entire factorial, the simulation uses an iterative approach:
+\[
+\text{term}_{n} = \text{term}_{n-1} \times \frac{x}{n}
+\]
+\[
+S_n = S_{n-1} + \text{term}_n
+\]
+where $\text{term}_0 = 1$ and $S_0 = 1$.
+
+\subsection*{Convergence Analysis}
+
+The Taylor series for $e^x$ has an infinite radius of convergence, meaning:
+\[
+\lim_{N \to \infty} S_N(x) = e^x \quad \forall x \in \mathbb{R}
+\]
+The simulation results show that as $N$ increases, the error decreases rapidly. For small $x$, the sum converges to machine precision within a few dozen terms.
+
+\subsection*{Simulation Interpretation}
+
+While Taylor series are theoretically exact in the limit, numerical implementations must consider:
+\begin{enumerate}
+    \item \textbf{Floating Point Precision:} Very small terms might eventually fall below the precision of a \texttt{double}.
+    \item \textbf{Computational Cost:} Higher values of $N$ provide more accuracy but require more floating-point operations.
+\end{enumerate}
+This simulation illustrates the fundamental trade-off between accuracy and computational resources in numerical approximation.

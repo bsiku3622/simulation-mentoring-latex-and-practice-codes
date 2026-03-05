@@ -1,0 +1,341 @@
+
+
+\section*{Graph-Based Structural System}
+
+There is a structure composed of a graph network
+\[
+G = (V, E)
+\]
+where $V$ is the set of nodes and $E$ is the set of edges.
+
+\subsection*{Node properties}
+
+Each node $v \in V$ has:
+
+\begin{itemize}
+\item position: $\vec{r}_v = (x_v, y_v) \in \mathbb{R}^2$
+\item mass: $m_v \in \mathbb{R}$
+\item fixed state: $f_v \in \{\mathrm{T}, \mathrm{F}\}$
+\end{itemize}
+
+\subsection*{Edge properties}
+
+Each edge $e \in E$ has:
+
+\begin{itemize}
+\item rest length: $l_e \in \mathbb{R}$
+\item rate: $r_e \in \mathbb{R}$
+\item connected nodes:
+\[
+n_e^{(\mathrm{left})}, \quad n_e^{(\mathrm{right})} \in V
+\]
+\end{itemize}
+
+Edges break when the normal force exceeds their strength.
+
+\vspace{3em}
+\hrule
+\vspace{2em}
+
+\subsection*{Equation of Motion}
+
+We know
+
+\[
+\vec{F} = M \vec{a}
+\]
+
+Thus,
+
+\[
+\vec{a} = M^{-1} \vec{F}
+\tag{1}
+\]
+
+since $M$ is diagonal and invertible.
+
+\subsection*{Constraint Definition}
+
+Define the constraint vector
+
+\[
+\vec{C}(\vec{r}) =
+\begin{bmatrix}
+C_1(\vec{r}) \\
+C_2(\vec{r}) \\
+\vdots \\
+C_k(\vec{r})
+\end{bmatrix}
+\]
+
+Each constraint is defined as
+
+\[
+C_e(\vec{r}) =
+l_e^2 -
+\left\|
+\vec{r}_{n_e^{(\mathrm{left})}} -
+\vec{r}_{n_e^{(\mathrm{right})}}
+\right\|^2
+\]
+
+The system is in equilibrium when
+
+\[
+\vec{C}(\vec{r}) = \vec{0}
+\]
+
+Assume equilibrium at $\vec{r}_0$:
+
+\[
+\vec{C}(\vec{r}_0) = \vec{0}
+\tag{2}
+\]
+
+Let
+
+\[
+\vec{r} = \vec{r}_0 + \vec{v} dt
+\]
+
+\subsection*{Linear Approximation}
+
+Using multivariable Taylor expansion:
+
+\[
+d\vec{C}(\vec{r})
+=
+\frac{\partial \vec{C}}{\partial \vec{r}}
+\, d\vec{r}
+\]
+
+Define the Jacobian
+
+\[
+J =
+\frac{\partial \vec{C}}{\partial \vec{r}}
+\]
+
+Then
+
+\[
+\vec{C}(\vec{r} + d\vec{r})
+\approx
+\vec{C}(\vec{r})
++
+J d\vec{r}
+\]
+
+For equilibrium,
+
+\[
+\vec{C}(\vec{r}) + J d\vec{r} = \vec{0}
+\tag{3}
+\]
+
+\subsection*{Normal Force Representation}
+
+Normal force is aligned with constraint gradient:
+
+\[
+\vec{N}_e \parallel \nabla C_e(\vec{r})
+\]
+
+Thus total normal force:
+
+\[
+\vec{N}
+=
+\sum_{e \in E}
+\lambda_e \nabla C_e(\vec{r})
+\]
+
+Matrix form:
+
+\[
+\vec{N}
+=
+J^T \vec{\lambda}
+\]
+
+\subsection*{Acceleration with Constraint Force}
+
+\[
+\vec{a}
+=
+M^{-1}
+(\vec{F}_{ext} + \vec{N})
+\]
+
+\[
+=
+M^{-1} \vec{F}_{ext}
++
+M^{-1} J^T \vec{\lambda}
+\]
+
+Define external acceleration
+
+\[
+\vec{a}_{ext}
+=
+M^{-1} \vec{F}_{ext}
+\]
+
+Then
+
+\[
+\vec{a}
+=
+\vec{a}_{ext}
++
+M^{-1} J^T \vec{\lambda}
+\]
+
+\subsection*{Displacement due to Constraint Force}
+
+Constraint-only displacement:
+
+\[
+d\vec{r}
+=
+\frac{1}{2}
+(\vec{a} - \vec{a}_{ext})
+dt^2
+\]
+
+Thus,
+
+\[
+d\vec{r}
+=
+\frac{1}{2}
+M^{-1}
+J^T
+\vec{\lambda}
+dt^2
+\tag{4}
+\]
+
+\subsection*{Solving for Lagrange Multiplier}
+
+Substitute (4) into (3):
+
+\[
+\vec{C}(\vec{r})
+=
+-
+J d\vec{r}
+\]
+
+\[
+=
+-
+\frac{1}{2}
+J M^{-1} J^T
+\vec{\lambda}
+dt^2
+\]
+
+Thus,
+
+\[
+\vec{\lambda}
+=
+-2
+\left(
+J M^{-1} J^T
+\right)^{-1}
+\vec{C}(\vec{r})
+dt^{-2}
+\]
+
+\subsection*{Final Position Correction}
+
+Substitute into (4):
+
+\[
+d\vec{r}
+=
+-
+M^{-1}
+J^T
+\left(
+J M^{-1} J^T
+\right)^{-1}
+\vec{C}(\vec{r})
+\]
+
+Velocity correction:
+
+\[
+\vec{v}
+\leftarrow
+\vec{v}
++
+\frac{d\vec{r}}{dt}
+\]
+
+\subsection*{Edge Breaking Condition}
+
+Normal force per edge:
+
+\[
+\vec{N}_e
+=
+\lambda_e
+\nabla C_e(\vec{r})
+\]
+
+This is proportional to normalized length change:
+
+\[
+\propto
+\frac{1}{l_e}
+\left(
+l_e^2 -
+\|\vec{r}_i - \vec{r}_j\|^2
+\right)
+\]
+
+Let length change be $\Delta l_e$.
+
+Approximation:
+
+\[
+\Delta l_e^2
+\approx
+2 l_e \Delta l_e
+\]
+
+Breaking condition:
+
+\[
+\frac{\Delta l_e^2}{l_e}
+>
+k l_e
+\]
+
+\[
+\frac{2 l_e \Delta l_e}{l_e}
+>
+k l_e
+\]
+
+\[
+\frac{\Delta l_e}{l_e}
+>
+\frac{k}{2}
+=
+k'
+\]
+
+Thus edge breaks when strain exceeds threshold:
+
+\[
+\boxed{
+\frac{\Delta l_e}{l_e}
+>
+k'
+}
+\]

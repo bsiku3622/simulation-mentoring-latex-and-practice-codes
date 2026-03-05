@@ -1,0 +1,42 @@
+\appendix
+\section*{Numerical Differentiation}
+
+Numerical differentiation is the process of approximating the derivative of a function using discrete values. This is essential in simulations where analytic derivatives are unknown or difficult to compute.
+
+\subsection*{Forward Difference}
+
+The simplest approximation is the forward difference, derived directly from the definition of the derivative:
+\[
+f'(x) \approx \frac{f(x+h) - f(x)}{h}
+\]
+Using Taylor expansion, $f(x+h) = f(x) + f'(x)h + \frac{1}{2}f''(\xi)h^2$. Substituting this reveals the truncation error:
+\[
+\frac{f(x+h) - f(x)}{h} = f'(x) + O(h)
+\]
+The forward difference is a first-order approximation.
+
+\subsection*{Central Difference}
+
+A more accurate approach is the central difference, which uses values on both sides of $x$:
+\[
+f'(x) \approx \frac{f(x+h) - f(x-h)}{2h}
+\]
+Consider the Taylor expansions:
+\[
+f(x+h) = f(x) + f'(x)h + \frac{1}{2}f''(x)h^2 + \frac{1}{6}f'''(\xi_1)h^3
+\]
+\[
+f(x-h) = f(x) - f'(x)h + \frac{1}{2}f''(x)h^2 - \frac{1}{6}f'''(\xi_2)h^3
+\]
+Subtracting the two equations:
+\[
+f(x+h) - f(x-h) = 2f'(x)h + O(h^3)
+\]
+\[
+\frac{f(x+h) - f(x-h)}{2h} = f'(x) + O(h^2)
+\]
+The central difference is a second-order approximation, meaning the error decreases quadratically as $h \to 0$.
+
+\subsection*{Comparison}
+
+In simulations, central difference is generally preferred over forward or backward difference because the $O(h^2)$ error term allows for much higher accuracy with the same step size $h$. However, it requires an extra function evaluation $f(x-h)$, which might not always be available (e.g., at the start of a simulation time series).

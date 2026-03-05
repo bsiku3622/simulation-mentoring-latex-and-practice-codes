@@ -1,0 +1,256 @@
+\section*{Projectile Simulation}
+
+There is a projectile which is launched with
+\[
+\vec{r_0} = (x_0, y_0)
+\]
+\[
+\vec{v_0} = (v_{0x}, v_{0y})
+\]
+
+The projectile is affected by gravity:
+\[
+\vec{F_g} = (0, -mg)
+\]
+
+The projectile is also affected by air resistance:
+\[
+\vec{F_r} = (-k v_x, -k v_y)
+\]
+
+There are some lines that the projectile can collide with. Each line is represented by two points:
+\[
+p_i = (\vec{p_{i1}}, \vec{p_{i2}})
+\]
+
+And there is constraint that
+\[
+\forall i, \vec{d_i} \parallel \hat{x} \lor \vec{d_i} \parallel \hat{y}
+\]
+\[
+\forall i, \vec{p}_{i2} = \vec{p}_{(i+1)1}
+\]
+
+where $\vec{d_i} = \vec{p_{i2}} - \vec{p_{i1}}$.
+
+
+\vspace{3em}
+\hrule
+\vspace{2em}
+
+\subsection*{Proof that the projectile cannot collide with a vertical edge}
+
+We consider a projectile with initial position
+\[
+\vec r_0 = (x_0, y_0)
+\]
+and initial velocity
+\[
+\vec v_0 = (v_{0x}, v_{0y})
+\]
+
+The forces acting on the projectile are gravity
+\[
+\vec F_g = (0, -mg)
+\]
+and linear air resistance
+\[
+\vec F_r = (-k v_x, -k v_y)
+\]
+
+We prove that the projectile cannot collide with any edge parallel to the $y$ axis.
+
+\subsection*{Step 1: Equation of motion in the $x$ direction}
+
+By Newton's second law,
+
+\[
+m \frac{dv_x}{dt} = -k v_x
+\]
+
+This is a separable differential equation:
+
+\[
+\frac{dv_x}{v_x} = -\frac{k}{m} dt
+\]
+
+Integrating:
+
+\[
+\ln |v_x| = -\frac{k}{m} t + C
+\]
+
+Thus,
+
+\[
+v_x(t) = v_{0x} e^{-\frac{k}{m}t}
+\]
+
+\subsection*{Step 2: Position function $x(t)$}
+
+Integrating velocity:
+
+\[
+x(t) = x_0 + \int_0^t v_x(s) ds
+\]
+
+\[
+x(t) =
+x_0 + \frac{m}{k} v_{0x}
+\left(1 - e^{-\frac{k}{m}t}\right)
+\]
+
+\subsection*{Step 3: Monotonicity of $x(t)$}
+
+Since
+
+\[
+e^{-\frac{k}{m}t} > 0 \quad \forall t
+\]
+
+we have
+
+\[
+v_x(t) = v_{0x} e^{-\frac{k}{m}t}
+\]
+
+Therefore the sign of $v_x(t)$ is constant:
+
+\[
+\text{sign}(v_x(t)) = \text{sign}(v_{0x})
+\]
+
+Thus,
+
+\[
+\frac{dx}{dt} = v_x(t)
+\]
+
+never changes sign.
+
+Therefore,
+
+\[
+x(t)
+\]
+
+is a strictly monotonic function.
+
+\subsection*{Step 4: Vertical edge definition}
+
+A vertical edge is defined by
+
+\[
+x = c
+\]
+
+for some constant $c$.
+
+A collision would require two distinct times $t_1 \neq t_2$ such that
+
+\[
+x(t_1) = x(t_2) = c
+\]
+
+\subsection*{Step 5: Application of the Intermediate Value Theorem}
+
+The function $x(t)$ is continuous.
+
+Since it is strictly monotonic, it is injective.
+
+Therefore,
+
+\[
+x(t_1) = x(t_2)
+\implies
+t_1 = t_2
+\]
+
+Thus, there cannot exist two distinct times where the projectile has the same $x$ coordinate.
+
+\subsection*{Conclusion}
+
+Since a collision with a vertical edge would require the projectile to reach the same $x$ coordinate more than once, and since $x(t)$ is strictly monotonic, this is impossible.
+
+Therefore,
+
+\[
+\boxed{
+\text{The projectile cannot collide with any edge parallel to the $y$ axis.}
+}
+\]
+
+\vspace{3em}
+\hrule
+\vspace{2em}
+
+\section*{Numerical Integration Convergence}
+
+In physics simulations, we often use simple update rules to approximate continuous motion. This section explains that as the time step $dt \to 0$, these numerical updates converge to the true analytical physical solutions.
+
+\subsection*{Case 1: Drag Force (Velocity Convergence)}
+
+\textbf{Mathematical Model:}
+Consider a particle subject to a drag force proportional to its velocity:
+\[
+F = -k v \implies m \frac{dv}{dt} = -k v \implies \frac{dv}{dt} = -\frac{k}{m} v
+\]
+The analytical solution is $v(t) = v_0 e^{-(k/m)t}$.
+
+\textbf{Discretized Update Rule:}
+In a simulation, we update the velocity using the rule:
+\[
+v += -(k/m) v \cdot dt \implies v_{n+1} = v_n \left(1 - \frac{k}{m} dt\right)
+\]
+
+\textbf{Convergence Explanation:}
+After $n$ steps ($t = n \cdot dt$), the velocity is:
+\[
+v_n = v_0 \left(1 - \frac{k}{m} dt\right)^n = v_0 \left(1 - \frac{k}{m} \frac{t}{n}\right)^n
+\]
+Using the definition of the exponential function $\lim_{n \to \infty} (1 - \frac{a}{n})^n = e^{-a}$:
+\[
+\lim_{dt \to 0} v_n = v_0 e^{-(k/m)t}
+\]
+Thus, the simulation result converges to the actual physical solution as $dt \to 0$.
+
+\subsection*{Case 2: Integrating Velocity to Position}
+
+\textbf{Mathematical Model:}
+Given a velocity function $v(t)$, the continuous equation is $dx/dt = v(t)$, which yields:
+\[
+x(t) = x_0 + \int_0^t v(s) ds
+\]
+
+\textbf{Discretized Update Rule:}
+The simulation repeatedly applies:
+\[
+x += v \cdot dt \implies x_{n+1} = x_n + v(t_n) dt
+\]
+
+\textbf{Convergence Explanation:}
+Summing the updates yields:
+\[
+x_n = x_0 + \sum_{k=0}^{n-1} v(t_k) dt
+\]
+This is exactly the \textbf{Riemann Sum} of the velocity function. As $dt \to 0$, the Riemann sum converges to the definite integral:
+\[
+\lim_{dt \to 0} x_n = x_0 + \int_0^t v(s) ds = x(t)
+\]
+
+\subsection*{Case 3: Full Trajectory (Acceleration to Position)}
+
+\textbf{Mathematical Model:}
+Given an acceleration $a(t)$, the system is:
+\[
+\frac{dv}{dt} = a(t), \quad \frac{dx}{dt} = v(t)
+\]
+
+\textbf{Discretized Update Rule:}
+The simulation updates both velocity and position:
+\[
+v += a \cdot dt, \quad x += v \cdot dt
+\]
+
+\textbf{Convergence Explanation:}
+As shown in Case 2, the velocity update converges to $v(t) = v_0 + \int a(t) dt$. Then, the position update, which uses these converged velocity values, also converges to the integral of $v(t)$. Therefore, the entire chain $a \to v \to x$ converges to the physical trajectory as $dt \to 0$.

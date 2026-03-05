@@ -1,0 +1,45 @@
+\documentclass{book}  % 또는 report, book
+\usepackage{kotex}
+
+\usepackage{titlesec}
+
+\titleformat{\section}
+  {\fontsize{18}{22}\bfseries}
+  {\thesection}
+  {1em}
+  {}
+
+\titleformat{\subsection}
+  {\fontsize{12}{15}\bfseries}
+  {\thesubsection}
+  {1em}
+  {}
+
+\input{layout}
+
+\begin{document}
+\begin{titlepage}
+    \centering
+    \vspace*{\fill}  % 위쪽 여백을 채움 (정확한 중앙 맞춤)
+
+    {\Huge Simulation Mentoring \par}
+    \vspace{0.5cm}
+    {\Large \textit{Simulation Developing Examples \& Proofs} \par}
+    \vspace{1cm}
+    {\Large Written by. 홍준서, 백재원\par}
+
+    \vspace*{\fill}  % 아래쪽 여백을 채움
+
+    {\large \today \par}
+\end{titlepage}
+
+\include{p1_projectile}
+\include{p2_control_flow}
+\include{p3_circular}
+\include{p4_performance}
+\include{p5_taylor}
+\include{final_simgraph}
+
+\include{appendix}
+
+\end{document}  

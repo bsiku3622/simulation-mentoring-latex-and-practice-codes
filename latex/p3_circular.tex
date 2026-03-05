@@ -1,0 +1,79 @@
+\section*{Circular Motion Simulation}
+
+Consider a particle moving in a circular path with radius $R$. Its position and velocity are
+\[
+\vec{r} = (x, y), \quad \vec{v} = (v_x, v_y)
+\]
+subject to a centripetal force
+\[
+\vec{F}_c = - m \omega^2 \vec{r}
+\]
+where $a = -\omega^2 x$ in each dimension. This simulation explores the stability of different update sequences.
+
+\subsection*{Time Integration: Semi-Implicit Euler Method}
+
+In \texttt{p3\_circle.cpp}, the simulation uses the following update sequence:
+\[
+\vec{v}_{n+1} = \vec{v}_n + \vec{a}(\vec{x}_n) dt
+\]
+\[
+\vec{x}_{n+1} = \vec{x}_n + \vec{v}_{n+1} dt
+\]
+This sequence is a simple yet powerful way to maintain stability in physical simulations.
+
+\subsection*{Why Velocity is Updated First: Time Grid Perspective}
+
+The reason for updating velocity before position can be understood through the relationship between velocity and the time grid.
+
+\begin{itemize}
+    \item \textbf{Time Offset (Staggered Grid):} Ideally, to calculate the next position $x_{n+1}$, we should use a velocity that represents the average motion over the interval $[t_n, t_{n+1}]$. By updating $v$ to $v_{n+1}$ first and then using it for $x$, we effectively use a velocity that is "ahead" of the current position. This creates a time offset between $x$ and $v$, making the simulation behave as if velocity is evaluated at the midpoint of the time step ($t_{n+1/2}$).
+    
+    \item \textbf{Feedback in Position-Dependent Forces:} In most physical systems, the force (and thus acceleration $\vec{a}$) is a function of position, $\vec{a} = \vec{a}(\vec{x})$. When we update $\vec{v}$ first using $\vec{a}(\vec{x}_n)$, the subsequent position update $\vec{x}_{n+1}$ is driven by a velocity that already "knows" the force acting at the previous position. This prevents the system from overshooting.
+    
+    \item \textbf{Energy Stability:} In circular motion, using the old velocity $\vec{v}_n$ (Explicit Euler) causes the particle to move linearly for the duration of $dt$, resulting in an ever-increasing radius and orbital energy. Using the updated velocity $\vec{v}_{n+1}$ corrects this by "pulling" the position update back toward the center, keeping the orbital energy bounded and the trajectory stable.
+\end{itemize}
+
+\subsection*{Summary of Update Rules}
+1. Compute acceleration $\vec{a}_n$ from the current position $\vec{x}_n$.
+2. Update velocity: $\vec{v}_{n+1} = \vec{v}_n + \vec{a}_n dt$.
+3. Update position using the \emph{new} velocity: $\vec{x}_{n+1} = \vec{x}_n + \vec{v}_{n+1} dt$.
+
+\vspace{3em}
+\hrule
+\vspace{2em}
+
+\section*{Grid-Based Heat Conduction Simulation}
+
+This simulation demonstrates how heat diffuses over a 1D spatial grid using numerical discretization of the heat equation.
+
+\subsection*{Mathematical Model}
+
+The evolution of temperature $T(x, t)$ is governed by the heat equation:
+\[
+\frac{\partial T}{\partial t} = \alpha \frac{\partial^2 T}{\partial x^2}
+\]
+where $\alpha$ is the thermal diffusivity.
+
+\subsection*{Spatial Discretization (Finite Difference)}
+
+To solve this on a computer, we divide space into a grid of points $T_i$ with spacing $h$. The second-order spatial derivative is approximated as:
+\[
+\frac{\partial^2 T}{\partial x^2} \approx \frac{T_{i+1} - 2T_i + T_{i-1}}{h^2}
+\]
+This allows heat to flow between adjacent cells based on their temperature difference.
+
+\subsection*{Discretized Update Rule}
+
+The simulation in \texttt{p3\_grid.cpp} employs a two-step update (Heun's method) for better stability:
+
+\textbf{1. Predictor step (Simple Euler):}
+\[
+\tilde{T}_i = T_i^n + \alpha dt \frac{T_{i+1}^n - 2T_i^n + T_{i-1}^n}{h^2}
+\]
+
+\textbf{2. Corrector step:}
+\[
+T_i^{n+1} = T_i^n + \frac{\alpha dt}{2} \left[ \left( \frac{\partial^2 T}{\partial x^2} \right)_{T^n} + \left( \frac{\partial^2 T}{\partial x^2} \right)_{\tilde{T}} \right]
+\]
+
+While the basic update rule $T_i^{new} = T_i + \alpha dt (\Delta T / h^2)$ is the foundation, this predictor-corrector approach provides a more accurate approximation of the continuous diffusion process.

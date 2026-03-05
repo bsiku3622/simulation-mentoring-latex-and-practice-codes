@@ -1,0 +1,55 @@
+\section*{Control Flow Performance: If-Else vs Switch}
+
+In high-performance simulations, the choice of control flow structures can significantly impact execution time. This section compares the \texttt{if-else} chain and the \texttt{switch} statement through a particle simulation where each particle's behavior depends on its type.
+
+\subsection*{Simulation Scenario}
+
+Consider a system of $N$ particles where each particle belongs to one of several types:
+\[
+\text{type} \in \{\text{TYPE\_A, TYPE\_B, TYPE\_C, TYPE\_D, TYPE\_E}\}
+\]
+For each particle, the acceleration $\vec{a}$ is assigned based on its type. We simulate $1,000,000$ particles over $1,000$ steps with a time step $\Delta t$, comparing the time taken by two different implementation styles for type-based acceleration assignment.
+
+\subsection*{Mathematical Model and Update Rule}
+
+The state of each particle is updated using the standard Euler method:
+\[
+\vec{v}_{n+1} = \vec{v}_n + \vec{a}(\text{type}) \Delta t
+\]
+\[
+\vec{x}_{n+1} = \vec{x}_n + \vec{v}_{n+1} \Delta t
+\]
+The function $\vec{a}(\text{type})$ is the bottleneck of this simulation as it is called $10^9$ times.
+
+\subsection*{Implementation Comparison}
+
+\textbf{1. If-Else Chain:}
+The \texttt{if-else} approach checks types sequentially:
+\begin{verbatim}
+if (type == A) return 0.1;
+else if (type == B) return 0.2;
+...
+\end{verbatim}
+In the worst case, the CPU performs multiple comparisons for a single particle, leading to $O(n)$ branching complexity.
+
+\textbf{2. Switch Statement:}
+The \texttt{switch} approach provides a structured way to handle multiple discrete values:
+\begin{verbatim}
+switch (type) {
+    case A: return 0.1;
+    case B: return 0.2;
+    ...
+}
+\end{verbatim}
+
+\subsection*{Simulation Interpretation: Jump Tables}
+
+Modern compilers often optimize a \texttt{switch} statement into a \textbf{Jump Table}. Instead of sequential comparisons, the CPU uses the \texttt{state} variable as an index into a table of memory addresses:
+\[
+\text{TargetAddress} = \text{TableBase} + (\text{state} \times \text{EntrySize})
+\]
+This allows the CPU to branch to the correct code block in $O(1)$ time. In contrast, an \texttt{if-else} chain performs $O(n)$ comparisons, which can lead to frequent branch mispredictions and pipeline stalls, especially when state transitions are frequent or random.
+
+\subsection*{Summary}
+
+The simulation in \texttt{p2\_jump\_table.cpp} demonstrates that for discrete state-based branching, the \texttt{switch} statement is generally more efficient due to its ability to be compiled into a jump table, providing constant-time branch resolution regardless of the number of states.
